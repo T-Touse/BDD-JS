@@ -1,9 +1,12 @@
-const { Report } = require("./test");
+const { TestSuite } = require("./test");
 
 class Scenario {
 	#givens = [];
 	#whens = [];
 	#thens = [];
+	constructor(name){
+		this.name = name
+	}
 
 	#test(value) {
 		if (typeof value !== "function") throw new Error("Expected a function");
@@ -32,9 +35,24 @@ class Scenario {
 	}
 
 	exec(ctx = {}) {
-		if (!this.#canExec(ctx)) return false;
-		this.#whens.forEach(callback => callback.apply(ctx));
-		return this.#thens.every(callback => callback.apply(ctx));
+		const suite = new TestSuite("Scenario Execution");
+
+		if (!this.#canExec(ctx)) {
+			suite.test("Given conditions", () => false);
+			return suite.run();
+		}
+		
+		suite.test("When", ()=>{
+			this.#whens.forEach(callback => {
+				callback.apply(ctx);
+			});
+		})
+
+		this.#thens.forEach(callback => {
+			suite.test("Then condition", () => callback.apply(ctx));
+		});
+
+		return suite.run();
 	}
 }
 
@@ -45,10 +63,13 @@ class Feature {
 	}
 
 	scenario(name, scenarioCallback) {
-		const scenario = new Scenario();
+		const scenario = new Scenario(name);
 		scenarioCallback(scenario);
 		this.scenarios.push({ name, scenario });
 		return this;
+	}
+	addScenraio(scenario){
+		this.scenarios.push({ name:scenario.name, scenario });
 	}
 	run() {
 		console.log(`Feature: ${this.name}`);
