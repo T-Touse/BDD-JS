@@ -1,4 +1,4 @@
-import { describe, test } from "../../src/core/test";
+const { describe, test } = require('../../index');
 
 describe("Math Utils", () => {
 	test("Addition should work", () => {

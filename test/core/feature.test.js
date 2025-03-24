@@ -1,6 +1,4 @@
-import { test, describe } from "bun:test";
-import { expect } from "../../src/core/expect";
-import { feature, Scenario } from "../../src/core/feature";
+const { describe, test, expect,feature,Scenario } = require('../../index');
 
 describe("Scenario", () => {
 	test("should instantiate correctly", () => {
