@@ -1,4 +1,4 @@
-class Expect {
+export class Expect {
 	#value;
 
 	constructor(value) {

@@ -1,40 +1,41 @@
-type TestFn = () => void | Promise<void>;
+import { describe, DescriptorTypes } from "./description";
 
-const TESTS: Array<{ name: string; fn: TestFn }> = [];
-let CURRENT_CONTEXT: string | null = null;
-
-/**
- * Déclare un groupe de tests.
- */
-export function describe(name: string, callback: () => void): void {
-	const previousContext = CURRENT_CONTEXT;
-	CURRENT_CONTEXT = previousContext ? `${previousContext} > ${name}` : name;
-	callback();
-	CURRENT_CONTEXT = previousContext; // Restaure le contexte après exécution
-}
-
-/**
- * Déclare un test.
- */
-export function test(name: string, fn: TestFn): void {
-	TESTS.push({ name: CURRENT_CONTEXT ? `${CURRENT_CONTEXT} > ${name}` : name, fn });
-}
-
-/**
- * Exécute tous les tests enregistrés.
- */
-async function runTests() {
-	for (const { name, fn } of TESTS) {
-		try {
-			await fn();
-			console.log(`✅ ${name}`);
-		} catch (error) {
-			
-			console.error(`❌ ${name} [${error.name??""}]`);
-			//console.error(error);
-		}
+function testRunner(callback: Function): Function {
+	return async () => {
+		callback()
+		return DescriptorTypes.TEST;
 	}
 }
 
-// Lancement automatique des tests après la fin du script principal
-process.nextTick(runTests);
+export function test(name: string, callback: Function) {
+	describe(name, testRunner(callback));
+}
+
+test.only = (name: string, callback: Function) => {
+	describe.only(name, testRunner(callback));
+};
+
+test.skip = (name: string, callback: Function) => {
+	describe.skip(name, testRunner(callback));
+};
+
+test.todo = (name: string, callback: Function) => {
+	describe.todo(name, testRunner(callback));
+};
+test.skipIf = function (condition: boolean) {
+	return (name: string, callback: Function) =>
+		describe.skipIf(condition)(name, testRunner(callback));
+}
+test.todoIf = function (condition: boolean) {
+	return (name: string, callback: Function) =>
+		describe.todoIf(condition)(name, testRunner(callback));
+}
+test.if = function (condition: boolean) {
+	return (name: string, callback: Function) =>
+		describe.if(condition)(name, testRunner(callback));
+}
+test.each = <T>(list: T[]) => {
+	return (name: string, callback: Function) => {
+		describe.each(list)(name, testRunner(callback));
+	};
+};

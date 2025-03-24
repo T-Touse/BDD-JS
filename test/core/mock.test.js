@@ -1,5 +1,4 @@
-const { describe, test, expect } = require('bun:test');
-const { mock } = require('../../src/core/mocks');
+const { describe, test, expect,mock } = require('../../index');
 
 describe("definied mock",()=>{
 	const mock_def = mock(_=>"Objectif",_=>"Template")
